@@ -17,7 +17,7 @@
 </head>
 
 <body>
-    <div class="container-fluid">
+    <div c lass="container-fluid">
         <div class="common_title">
             文章类别管理
         </div>
@@ -31,25 +31,168 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>奇趣事</td>
-                        <td>funny</td>
-                        <td class="text-center">
-                            <a href="javascript:void(0);" data-toggle="modal" class=" btn btn-info btn-xs">编辑</a>
-                            <a href="javascript:void(0);" class="btn btn-danger btn-xs">删除</a>
-                        </td>
-                    </tr>
+
                 </tbody>
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="javascript:void(0)" class="btn btn-success" id="xinzengfenlei" data-toggle="modal"
+                            <a href=" ## " class="btn btn-success" id="xinzengfenlei" data-toggle="modal"
                                 data-target="#myModal">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
             </table>
+
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <!-- 头 -->
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="exampleModalLabel"></h4>
+                        </div>
+                        <!-- 中 -->
+                        <div class="modal-body">
+                            <form>
+                                <input type="hidden" class="form-control" id="recipient-id">
+                                <div class="form-group">
+                                    <label for="recipient-name" class="control-label">名称:</label>
+                                    <input type="text" class="form-control" id="recipient-name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="recipient-slug" class="control-label">Slug:</label>
+                                    <input class="form-control" id="recipient-slug" type="text"></input>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- 底 -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" id="article_save">保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <script src="./libs/template-web.js"></script>
+            <script type="text/html" id="typeList">
+                {{each data as value i}}
+                <tr>
+                    <td>{{value.name}}</td>
+                    <td>{{value.slug}}</td>
+                    <td class="text-center">
+                        <a href="javascrip:;" data-id="{{value.id}}" data-toggle="modal" class=" btn btn-info btn-xs">编辑</a>
+                        <a href=" ## " data-id="{{value.id}}" class="btn btn-danger btn-xs btn-delete">删除</a>
+                    </td>
+                </tr>
+                {{/each}}
+            </script>
+            <script src="./js/http.js"></script>
+            <script>
+                $(function () {
+                    $.ajax({
+                        url: $urlBody.category_list,
+                        type: 'get',
+                        success: function (data) {
+                            if (data.code == 200) {
+                                var html = template('typeList', data);
+                                $('.table').find('tbody').html(html);
+                                $('.table').find('tbody').on('click', '.btn-info', function (e) {
+                                    $('#xinzengfenlei').click();
+                                    $('#exampleModalLabel').text($(e.target).html());
+                                    addCatlist($(e.target).attr('data-id'))
+                                }).on('click', '.btn-delete', function (e) {
+                                    $.ajax({
+                                        url:$urlBody.category_delete,
+                                        data:{
+                                            id:$(e.target).attr('data-id')
+                                        },
+                                        type:'post',
+                                        dataType:'json',
+                                        success:function(data){
+                                            console.log(data);
+                                            if (data.code == 204) {
+                                                alert('删除成功');
+                                                window.location.reload()
+                                            }
+                                        }
+                                    }) 
+                                });
+
+                            }
+                        }
+                    })
+                })
+                $('#xinzengfenlei').on('click', function () {
+                    $('#recipient-id,#recipient-name,#recipient-slug').val('');
+                    $('#exampleModalLabel').text('新增分类');
+                })
+                //查询
+                function addCatlist(id) {
+                    $.ajax({
+                        url: $urlBody.category_search,
+                        data: { id: id },
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.code == 200) {
+                                var data = data.data[0];
+                                for (const i in data) {
+                                    $('#recipient-' + i).val(data[i])
+                                }
+                            }
+                        }
+                    })
+                }
+                //修改与添加
+                function update(flag, formData) {
+                    var url = ''
+                    // 添加
+                    if (flag == 1) {
+                        url = $urlBody.category_add;
+                    }
+                    // 修改
+                    else {
+                        url = $urlBody.category_edit;
+                    }
+                    $.ajax({
+                        url: url,
+                        data: formData,
+                        dataType: 'json',
+                        type: 'post',
+                        success: function (data) {
+                            console.log(data);
+                            if (data.code == 201 || data.code == 200) {
+                                alert('保存成功');
+                                window.location.reload();
+                            }
+                        }
+                    })
+                }
+
+                $('#article_save').click(function () {
+                    var id = $('#myModal').find('input:hidden').val();
+                    if (id == null || id == "") {
+                        var arrForm = {
+                            name: $('#recipient-name').val(),
+                            slug: $('#recipient-slug').val()
+                        };
+                        update(1, arrForm);
+                    } else {
+                        var arrForm = {
+                            id: $('#recipient-id').val(),
+                            name: $('#recipient-name').val(),
+                            slug: $('#recipient-slug').val()
+                        };
+                        update(0, arrForm);
+                    }
+                });
+            </script>
         </div>
     </div>
+
+</body>
 
 </html>

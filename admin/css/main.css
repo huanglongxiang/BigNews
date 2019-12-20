@@ -179,7 +179,7 @@ body{
 
 .menu .level02{
     background: #242732;
-    display:none;
+    display: none;
 }
 
 
@@ -213,6 +213,11 @@ body{
 
 .menu .level02 .active a{
     color:#ffae00;
+    transition: all 0.5s ease;
+}
+
+.menu .level01 b.rotates{
+    transform: rotate(0deg);
 }
 
 .header_bar{

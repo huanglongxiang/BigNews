@@ -13,6 +13,7 @@
     <script src="./libs/jquery-1.12.4.min.js"></script>
     <!-- 引入模板引擎js文件 -->
     <script src="./libs/template-web.js"></script>
+    <script src="./libs/josecebe/jquery.twbsPagination.js"></script>
 </head>
 
 <body>
@@ -26,10 +27,6 @@
                     <form class="form-inline">
                         <select id="selCategory" name="" class="form-control input-sm">
                             <option value="">所有分类</option>
-                            <option>未分类</option>
-                            <option>奇趣事</option>
-                            <option>会生活</option>
-                            <option>爱旅行</option>
                         </select>
                         <select id="selStatus" name="" class="form-control input-sm">
                             <option value="">所有状态</option>
@@ -55,23 +52,110 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>王积千造统最头</td>
-                        <td>杰克</td>
-                        <td>奇趣事</td>
-                        <td class="text-center">2017-06-08 07:08:46</td>
-                        <td class="text-center">已发布</td>
-                        <td class="text-center">
-                            <a href="article_edit.html" class="btn btn-default btn-xs">编辑</a>
-                            <a href="javascript:void(0);" class="btn btn-danger btn-xs delete">删除</a>
-                        </td>
-                    </tr>
+
                 </tbody>
             </table>
+
             <div class="row text-center">
+                <ul id="pagination-demo" class="pagination-sm"></ul>
             </div>
         </div>
     </div>
+    <script src="./libs/template-web.js"></script>
+    <script type="text/html" id="opc_type">
+        {{each data as value i}}
+        <option value="{{value.id}}">
+            {{value.name}}
+        </option>
+        {{/each}}
+    </script>
+    <script type="text/html" id="contentAriList">
+        {{each data as value i}}
+        <tr>
+            <td>{{value.title}}</td>
+            <td>{{value.author}}</td>
+            <td>{{value.category}}</td>
+            <td class="text-center">{{value.date}}</td>
+            <td class="text-center">{{value.state}}</td>
+            <td class="text-center">
+                <a href="article_edit.html" class="btn btn-default btn-xs">编辑</a>
+                <a href="javascript:void(0);" class="btn btn-danger btn-xs delete">删除</a>
+            </td>
+        </tr>
+        {{/each}}
+    </script>
+    <script src="./js/http.js"></script>
+    <script>
+        $(function () {
+            var flag = false;
+            $.ajax({
+                url: $urlBody.category_list,
+                type: 'get',
+                success: function (data) {
+                    if (data.code == 200) {
+                        var html = template('opc_type', data);
+                        $('#selCategory').append(html);
+                    }
+                }
+            })
+            function querlist(params, callback) {
+                $.ajax({
+                    url: $urlBody.article_query,
+                    type: 'get',
+                    dataType: 'json',
+                    data: params,
+                    success: function (data) {
+                        if (data.code == 200) {
+                            callback(data);
+                        }
+                    }
+                })
+            }
+            function getList(params,flag) {
+                querlist(params, function (data) {
+                    var sumData = data.data;
+                    var html = template('contentAriList', sumData);
+                    $('.table').find('tbody').html(html);
+                    if (flag != null) {
+                        pagPage(sumData.totalPage, flag); 
+                    }
+                })
+            }
+            getList({perpage: 10},true);
+            function pagPage(params, flag) {
+                $('#pagination-demo').twbsPagination('destroy');
+                $('#pagination-demo').twbsPagination({
+                    totalPages: params,
+                    visiblePages: 7,
+                    next: '下一页',
+                    prev: '上一页',
+                    last: '尾页',
+                    first: '首页',
+                    onPageClick: function (event, page) {
+                        $('#page-content').text('Page ' + page);
+                        tabPage(page, flag);
+                    }
+                });
+            }
+            function tabPage(page, flag) {
+                data = {
+                    type: $('#selCategory').val(),
+                    state: $('#selStatus').val(),
+                    page: page,
+                    perpage: 10,
+                }
+                getList(data,null);
+            }
+            $('#btnSearch').on('click', function (e) {
+                e.preventDefault();
+                getList({
+                    type: $('#selCategory').val(),
+                    state: $('#selStatus').val(),
+                    perpage: 10,
+                },true);
+            })
+        })
+    </script>
 </body>
 
 </html>

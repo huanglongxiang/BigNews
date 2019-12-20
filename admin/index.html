@@ -24,15 +24,15 @@
             <b>管理员</b>
         </div>
         <!-- 左侧导航栏 -->
-        <div class="menu">
-            <div class="level01 active"><a href="#" target="main_frame"><i
+        <div class="menu" id="left_men">
+            <div class="level01 active"><a href="javascript:void(0)" target="main_frame"><i
                         class="iconfont icon-yidiandiantubiao04"></i><span>首页</span></a></div>
             <div class="level01"><a href="#"><i class="iconfont icon-icon-article"></i><span>文章管理</span><b
                         class="iconfont icon-arrowdownl"></b></a></div>
             <ul class="level02">
-                <li><a href="#" target="main_frame"><i class="iconfont icon-previewright"></i><span>文章列表</span></a></li>
-                <li><a href="#" target="main_frame"><i class="iconfont icon-previewright"></i><span>发表文章</span></a></li>
-                <li><a href="#" target="main_frame"><i class="iconfont icon-previewright"></i><span>文章类别管理</span></a>
+                <li><a href="javascript:void(0)" target="main_frame"><i class="iconfont icon-previewright"></i><span>文章列表</span></a></li>
+                <li><a href="javascript:void(0)" target="main_frame"><i class="iconfont icon-previewright"></i><span>发表文章</span></a></li>
+                <li><a href="javascript:void(0)" target="main_frame"><i class="iconfont icon-previewright"></i><span>文章类别管理</span></a>
                 </li>
             </ul>
 
@@ -43,16 +43,76 @@
         </div>
         <!-- 顶部栏 -->
         <div class="header_bar">
-            <div class="user_center_link">
-                <a href="./user.html" target="main_frame">个人中心</a>
+            <div class="user_center_link" id="urse">
+                <a href="javascript:void(0)" target="main_frame">个人中心</a>
                 <img src="images/2.jpg" alt="person">
                 <a href="javascript:void(0)" class="logout"><i class="iconfont icon-tuichu"></i> 退出</a>
             </div>
         </div>
         <!-- 右侧主体内容 -->
         <div class="main" id="main_body">
-
+            <iframe src="../admin/main_count.html" width="100%" height="100%" frameborder="0"></iframe>
         </div>
     </div>
+    <script src="./js/http.js"></script>
+    <script>
+        $(function () {
+            $('#urse').find('a').on('click',function(e){
+                if ($(e.target).text()=='个人中心') {
+                    $('#main_body').find('iframe').attr('src','./user.html');
+                }else{
+                    localStorage.removeItem('token');
+                    $(this).attr('href','./login.html');
+                    $(this).click();
+                }
+                return false;
+            });
+            $.ajax({
+                url: $urlBody.user_info,
+                success: function (data) {
+                    // var data = data.data;
+                    console.log(data);
+                    if (data.code == 200) {
+                        var data = data.data;
+                        $('.user_info,.user_center_link').find('img').attr('src',data.userPic);
+                        $('.user_info').find('span').text(data.nickname);
+                    }
+                }
+            })
+
+        })
+        $('.level01').on('click', function (e) {
+            $(this).addClass('active').siblings().removeClass('active');
+            if ($(this).index() == 1) {
+                $('.level02').slideToggle();
+                $(this).find('.icon-arrowdownl').toggleClass('rotates');
+                $('#main_body').find('iframe').attr('src','./article_list.html');
+                $('.level02').find('li').eq(0).addClass('active');
+                $('.level02').find('li').on('click',function(){
+                    $(this).addClass('active').siblings().removeClass('active');
+                    if ($(this).index() == 0) {
+                        $('#main_body').find('iframe').attr('src','./article_list.html');
+                    } else if ($(this).index() == 1) {
+                        $('#main_body').find('iframe').attr('src','./article_release.html');
+                    }
+                    else if ($(this).index() == 2) {
+                        $('#main_body').find('iframe').attr('src','./article_category.html');
+                    }
+                })
+            }
+            else if ($(this).index() == 0) {
+                $('#main_body').find('iframe').attr('src','./main_count.html');
+            }
+            
+            else if ($(this).index() == 4) {
+                $('#main_body').find('iframe').attr('src','./user.html');
+            }
+            else{
+                $('.level02').slideUp();
+                $(this).siblings().find('.icon-arrowdownl').removeClass('rotates');
+            }
+        })
+    </script>
 </body>
+
 </html>
