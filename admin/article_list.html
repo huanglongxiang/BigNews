@@ -87,17 +87,7 @@
     <script src="./js/http.js"></script>
     <script>
         $(function () {
-            var flag = false;
-            $.ajax({
-                url: $urlBody.category_list,
-                type: 'get',
-                success: function (data) {
-                    if (data.code == 200) {
-                        var html = template('opc_type', data);
-                        $('#selCategory').append(html);
-                    }
-                }
-            })
+            //请求数据
             function querlist(params, callback) {
                 $.ajax({
                     url: $urlBody.article_query,
@@ -111,6 +101,7 @@
                     }
                 })
             }
+            //渲染列表
             function getList(params,flag) {
                 querlist(params, function (data) {
                     var sumData = data.data;
@@ -121,7 +112,7 @@
                     }
                 })
             }
-            getList({perpage: 10},true);
+            //渲染分页
             function pagPage(params, flag) {
                 $('#pagination-demo').twbsPagination('destroy');
                 $('#pagination-demo').twbsPagination({
@@ -137,6 +128,7 @@
                     }
                 });
             }
+            //分页实现
             function tabPage(page, flag) {
                 data = {
                     type: $('#selCategory').val(),
@@ -146,6 +138,16 @@
                 }
                 getList(data,null);
             }
+            $.ajax({
+                url: $urlBody.category_list,
+                type: 'get',
+                success: function (data) {
+                    if (data.code == 200) {
+                        var html = template('opc_type', data);
+                        $('#selCategory').append(html);
+                    }
+                }
+            })
             $('#btnSearch').on('click', function (e) {
                 e.preventDefault();
                 getList({
@@ -154,6 +156,7 @@
                     perpage: 10,
                 },true);
             })
+            getList({perpage: 10},true);
         })
     </script>
 </body>
